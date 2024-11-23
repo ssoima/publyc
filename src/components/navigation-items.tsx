@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import { BookOpen, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { posts } from "@/data/posts";
+import { useEffect, useState } from "react";
+import type { Tables } from "@/lib/database.types";
 
 interface NavigationItemsProps {
   onItemClick?: () => void;
@@ -12,6 +13,27 @@ interface NavigationItemsProps {
 
 export function NavigationItems({ onItemClick }: NavigationItemsProps) {
   const pathname = usePathname();
+  const [posts, setPosts] = useState<Tables<'content_items'>[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/db/read');
+        const data = await response.json();
+        
+        if (data.content_items) {
+          setPosts(data.content_items);
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   return (
     <div className="flex flex-col flex-1">
@@ -44,24 +66,30 @@ export function NavigationItems({ onItemClick }: NavigationItemsProps) {
 
       {/* Posts list */}
       <div className="px-3 py-2">
-        <div className="space-y-1">
-          {posts.map((post) => (
-            <Link
-              key={post.id}
-              href={`/post/${post.id}`}
-              onClick={onItemClick}
-              className={cn(
-                "flex items-center gap-x-2 text-base px-4 py-3 rounded-lg transition-colors",
-                pathname === `/post/${post.id}`
-                  ? "bg-primary/10 text-primary" 
-                  : "hover:bg-muted"
-              )}
-            >
-              <MessageSquare className="h-5 w-5" />
-              {post.title}
-            </Link>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-4">
+            <span className="text-sm text-muted-foreground">Loading posts...</span>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {posts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/post/${post.id}`}
+                onClick={onItemClick}
+                className={cn(
+                  "flex items-center gap-x-2 text-base px-4 py-3 rounded-lg transition-colors",
+                  pathname === `/post/${post.id}`
+                    ? "bg-primary/10 text-primary" 
+                    : "hover:bg-muted"
+                )}
+              >
+                <MessageSquare className="h-5 w-5" />
+                {post.title}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

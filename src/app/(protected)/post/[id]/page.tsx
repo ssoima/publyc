@@ -7,7 +7,7 @@ import { Menu, PenSquare, RotateCcw, Share2, ImagePlus, X } from 'lucide-react'
 import { notFound, useParams } from "next/navigation"
 import Image from "next/image"
 import { SharePopup } from "@/components/share-popup"
-import { posts } from "@/data/posts"
+import type { Tables } from "@/lib/database.types"
 
 
 const textareaStyles = {
@@ -26,7 +26,8 @@ export default function PostPage() {
   const params = useParams()
   const [editMode, setEditMode] = useState<'x' | 'linkedin' | null>(null)
   const [regeneratePrompt, setRegeneratePrompt] = useState("")
-  const [currentPost, setCurrentPost] = useState(posts[0])
+  const [currentPost, setCurrentPost] = useState<Tables<'content_items'> | null>(null)
+  const [loading, setLoading] = useState(true)
   const [media, setMedia] = useState<string | null>(null)
   const [selectedText, setSelectedText] = useState("")
   const [aiInstructions, setAiInstructions] = useState("")
@@ -37,11 +38,26 @@ export default function PostPage() {
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
 
   useEffect(() => {
-    const foundPost = posts.find(p => p.id === params.id)
-    if (foundPost) {
-      setCurrentPost(foundPost)
-    } else {
-      notFound()
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`/api/db/read?id=${params.id}`)
+        const data = await response.json()
+        
+        if (data.content_items && data.content_items[0]) {
+          setCurrentPost(data.content_items[0])
+        } else {
+          notFound()
+        }
+      } catch (error) {
+        console.error('Error fetching post:', error)
+        notFound()
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (params.id) {
+      fetchPost()
     }
   }, [params.id])
 
@@ -83,21 +99,25 @@ export default function PostPage() {
   }
 
   const regenerateSelectedText = () => {
-    // This is where you would integrate with an AI service to regenerate the text
-    console.log("Regenerating text with instructions:", aiInstructions)
-    // For now, we'll just append the instructions to the selected text as a placeholder
-    if (textareaRef.current) {
-      const currentValue = textareaRef.current.value
-      const start = currentValue.indexOf(selectedText)
-      if (start !== -1) {
-        const newValue = currentValue.slice(0, start) + 
-                         selectedText + " [AI regenerated: " + aiInstructions + "]" + 
-                         currentValue.slice(start + selectedText.length)
-        if (editMode === 'x') {
-          setCurrentPost({...currentPost, x_description: newValue})
-        } else if (editMode === 'linkedin') {
-          setCurrentPost({...currentPost, linkedin_description: newValue})
-        }
+    if (!currentPost || !textareaRef.current) return;
+    
+    const currentValue = textareaRef.current.value
+    const start = currentValue.indexOf(selectedText)
+    if (start !== -1) {
+      const newValue = currentValue.slice(0, start) + 
+                       selectedText + " [AI regenerated: " + aiInstructions + "]" + 
+                       currentValue.slice(start + selectedText.length)
+      
+      if (editMode === 'x') {
+        setCurrentPost({
+          ...currentPost,
+          x_description: newValue ?? ''
+        })
+      } else if (editMode === 'linkedin') {
+        setCurrentPost({
+          ...currentPost,
+          linkedin_description: newValue ?? ''
+        })
       }
     }
     setSelectedText("")
@@ -120,15 +140,52 @@ export default function PostPage() {
   }
 
   const handleXDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentPost({ ...currentPost, x_description: e.target.value })
+    if (!currentPost) return;
+    setCurrentPost({ 
+      ...currentPost, 
+      x_description: e.target.value || '' // Fallback to empty string
+    });
   }
 
   const handleLinkedInDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentPost({ ...currentPost, linkedin_description: e.target.value })
+    if (!currentPost) return;
+    setCurrentPost({ 
+      ...currentPost, 
+      linkedin_description: e.target.value || '' // Fallback to empty string
+    });
+  }
+
+  const handleSave = async () => {
+    if (!currentPost) return
+
+    try {
+      const response = await fetch('/api/db/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: currentPost.id,
+          x_description: currentPost.x_description,
+          linkedin_description: currentPost.linkedin_description,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update post')
+      
+      setEditMode(null)
+    } catch (error) {
+      console.error('Error saving post:', error)
+      // You might want to show an error toast here
+    }
+  }
+
+  if (loading) {
+    return <div>Loading...</div>
   }
 
   if (!currentPost) {
-    return <div>Loading...</div>
+    return notFound()
   }
 
   return (
@@ -140,9 +197,9 @@ export default function PostPage() {
 
       <main className="container max-w-2xl mx-auto p-4 space-y-6">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">{currentPost.title}</h1>
+          <h1 className="text-4xl font-bold tracking-tight">{currentPost?.title || ''}</h1>
           <time className="text-blue-600 font-medium">
-            Last updated: {new Date(currentPost.createdAt).toLocaleDateString('en-US', {
+            Last updated: {new Date(currentPost?.created_at || new Date()).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
               year: 'numeric'
@@ -189,7 +246,7 @@ export default function PostPage() {
         </div>
 
         <div className="prose dark:prose-invert max-w-none">
-          <p className="text-xl leading-relaxed">{currentPost.details}</p>
+          <p className="text-xl leading-relaxed">{currentPost?.details || ''}</p>
         </div>
 
         <Card className="border-2 border-dashed">
@@ -239,7 +296,7 @@ export default function PostPage() {
                   <div className="relative">
                     <Textarea
                       ref={textareaRef}
-                      value={currentPost.x_description}
+                      value={currentPost?.x_description || ''} // Fallback to empty string
                       onChange={handleXDescriptionChange}
                       className="min-h-[100px] relative z-10 bg-white"
                       onSelect={handleTextSelection}
@@ -289,14 +346,19 @@ export default function PostPage() {
                     >
                       Cancel
                     </Button>
-                    <Button className="bg-black text-white hover:bg-black/90">Save Changes</Button>
+                    <Button 
+                      className="bg-black text-white hover:bg-black/90"
+                      onClick={handleSave}
+                    >
+                      Save Changes
+                    </Button>
                   </div>
                 </div>
               ) : (
                 <div 
                   className="min-h-[100px] p-4 rounded-md border bg-white"
                   dangerouslySetInnerHTML={{ 
-                    __html: currentPost.x_description 
+                    __html: currentPost?.x_description || '' // Fallback to empty string
                   }}
                 />
               )}
@@ -329,7 +391,7 @@ export default function PostPage() {
                   <div className="relative">
                     <Textarea
                       ref={textareaRef}
-                      value={currentPost.linkedin_description}
+                      value={currentPost?.linkedin_description || ''} // Fallback to empty string
                       onChange={handleLinkedInDescriptionChange}
                       className="min-h-[100px] relative z-10 bg-transparent"
                       onSelect={handleTextSelection}
@@ -377,14 +439,19 @@ export default function PostPage() {
                     >
                       Cancel
                     </Button>
-                    <Button className="bg-black text-white hover:bg-black/90">Save Changes</Button>
+                    <Button 
+                      className="bg-black text-white hover:bg-black/90"
+                      onClick={handleSave}
+                    >
+                      Save Changes
+                    </Button>
                   </div>
                 </div>
               ) : (
                 <div 
                   className="min-h-[100px] p-4 rounded-md border bg-white"
                   dangerouslySetInnerHTML={{ 
-                    __html: currentPost.linkedin_description 
+                    __html: currentPost?.linkedin_description || '' // Fallback to empty string
                   }}
                 />
               )}
