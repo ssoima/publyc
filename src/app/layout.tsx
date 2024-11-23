@@ -31,7 +31,7 @@ export default function RootLayout({
             <Sidebar />
           </div>
           <div className="lg:pl-64 h-full">
-            <div className="h-[60px] fixed inset-y-0 w-full z-50 px-4 border-b bg-background flex items-center lg:hidden">
+            <div className="h-[60px] fixed inset-y-0 w-full z-50 px-4 flex items-center lg:hidden">
               <MobileSidebar />
             </div>
             <main className="pt-[60px] lg:pt-0 h-full">
