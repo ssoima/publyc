@@ -47,6 +47,7 @@ export default function KnowledgePage() {
   const [knowledgeEntries, setKnowledgeEntries] = useState<KnowledgeEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [goalsAndIdentity, setGoalsAndIdentity] = useState(userProfile.goalsAndIdentity)
 
   // Fetch knowledge entries
   useEffect(() => {
@@ -98,6 +99,10 @@ export default function KnowledgePage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleGoalsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setGoalsAndIdentity(e.target.value)
   }
 
   return (
@@ -153,7 +158,8 @@ export default function KnowledgePage() {
           <div>
             <h3 className="text-sm font-medium mb-2 text-black/60 dark:text-[#FFFBF0]/60">Goals & Identity</h3>
             <Textarea
-              value={userProfile.goalsAndIdentity}
+              value={goalsAndIdentity}
+              onChange={handleGoalsChange}
               className="min-h-[150px] bg-[#2D12E9]/5 dark:bg-[#FFFBF0]/5 
                         text-black dark:text-[#FFFBF0] 
                         border-none resize-none"
@@ -173,9 +179,8 @@ export default function KnowledgePage() {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Add Knowledge Entry</DialogTitle>
-                  </DialogHeader>
+                  <DialogTitle>Add Knowledge Entry</DialogTitle>
+                
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="title">Title</Label>
