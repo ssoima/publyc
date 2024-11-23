@@ -24,44 +24,44 @@ export default function Home() {
         </div>
 
         {/* Bottom section with scroll area and buttons */}
-        <div className={`w-full space-y-6 transition-opacity duration-300 ${isSpeaking ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <ScrollArea className="w-full max-w-3xl mb-8">
-            <div className="flex gap-4 pb-4">
-              {mockArticles.map((article) => (
-                <div
-                  key={article.id}
-                  className="w-64 flex-none rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden hover:shadow-lg transition-shadow duration-200"
-                >
-                  <div className="p-4">
-                    <h3 className="font-semibold text-sm mb-2 text-[#2D12E9] dark:text-[#FFFBF0] line-clamp-1">
-                      {article.title}
-                    </h3>
-                    <p className="text-xs text-black dark:text-[#FFFBF0] line-clamp-2">
-                      {article.excerpt}
-                    </p>
-                    <span className="text-xs text-[#2D12E9] dark:text-[#FFFBF0] mt-2 block">
-                      {new Date(article.date).toLocaleDateString()}
-                    </span>
-                  </div>
+        <div className="w-full space-y-6">
+        <ScrollArea className="w-full max-w-3xl mb-8">
+          <div className="flex gap-4 pb-4">
+            {mockArticles.map((article) => (
+              <div
+                key={article.id}
+                className="w-64 flex-none rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden hover:shadow-lg transition-shadow duration-200"
+              >
+                <div className="p-4">
+                  <h3 className="font-semibold text-sm mb-2 text-[#2D12E9] dark:text-[#FFFBF0] line-clamp-1">
+                    {article.title}
+                  </h3>
+                  <p className="text-xs text-black dark:text-[#FFFBF0] line-clamp-2">
+                    {article.excerpt}
+                  </p>
+                  <span className="text-xs text-[#2D12E9] dark:text-[#FFFBF0] mt-2 block">
+                    {new Date(article.date).toLocaleDateString()}
+                  </span>
                 </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
           <div className="flex gap-4 items-center justify-center">
-            <Button
-              asChild
-              variant="outline"
-              className="w-[140px] h-12 rounded-full border-[#2D12E9] dark:border-[#FFFBF0] hover:bg-[#2D12E9]/10 dark:hover:bg-[#FFFBF0]/10 text-[#2D12E9] dark:text-[#FFFBF0]"
-            >
-              <a href="/create">Add Knowledge</a>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="w-[140px] h-12 rounded-full border-[#2D12E9] dark:border-[#FFFBF0] hover:bg-[#2D12E9]/10 dark:hover:bg-[#FFFBF0]/10 text-[#2D12E9] dark:text-[#FFFBF0]"
-            >
+          <Button
+            asChild
+            variant="outline"
+            className="w-[140px] h-12 rounded-full border-[#2D12E9] dark:border-[#FFFBF0] hover:bg-[#2D12E9]/10 dark:hover:bg-[#FFFBF0]/10 text-[#2D12E9] dark:text-[#FFFBF0]"
+          >
+            <a href="/create">Add Knowledge</a>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="w-[140px] h-12 rounded-full border-[#2D12E9] dark:border-[#FFFBF0] hover:bg-[#2D12E9]/10 dark:hover:bg-[#FFFBF0]/10 text-[#2D12E9] dark:text-[#FFFBF0]"
+          >
               <a href="/examples">Create Post</a>
             </Button>
           </div>
