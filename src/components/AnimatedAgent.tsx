@@ -38,7 +38,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
         }}
       />
       <motion.div
-        className="absolute inset-2 bg-[#FFFBF0] dark:bg-black rounded-full flex items-center justify-center"
+        className="absolute inset-2 bg-white dark:bg-black rounded-full flex items-center justify-center"
         animate={{
           rotate: isSpeaking ? 360 : 0
         }}

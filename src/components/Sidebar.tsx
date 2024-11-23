@@ -10,7 +10,7 @@ export function Sidebar() {
       <div className="flex flex-col h-full">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800">
           <Link href="/" className="block">
-            <h2 className="text-2xl font-bold">Publyc</h2>
+            <h2 className="text-2xl font-bold">publyc</h2>
           </Link>
         </div>
         <div className="flex-1">
