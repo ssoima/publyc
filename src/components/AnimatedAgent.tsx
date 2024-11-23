@@ -9,11 +9,11 @@ interface AnimatedAgentProps {
   token: string
 }
 
-export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking, token }) => {
+export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const [rotation, setRotation] = useState(0);
   const [devices, setDevices] = useState<{ audio: MediaDeviceInfo[] }>({ audio: [] });
-  const [token, setToken] = useState(token);
+  const [token, setToken] = useState('');
 
   // Get available audio devices
   useEffect(() => {
@@ -45,7 +45,8 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking, token 
           },
         });
         const data = await response.json();
-        setToken(data.token);
+        console.log('token', data.accessToken)
+        setToken(data.accessToken);
       } catch (error) {
         console.error("Failed to fetch token:", error);
       }
@@ -119,6 +120,10 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking, token 
       interval = setInterval(() => {
         setRotation((prev) => (prev + 10) % 360);
       }, 100);
+    } else if (!isSpeaking && retellClientRef.current) {
+      console.log('📞 isSpeaking deactivated, stopping call...');
+      retellClientRef.current.stopCall();
+      retellClientRef.current = null;
     }
 
     return () => {
@@ -129,7 +134,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking, token 
         retellClientRef.current = null;
       }
     };
-  }, [isSpeaking, token, devices.audio]);
+  }, [token, devices.audio, isSpeaking]);
 
   return (
     <div className="relative w-48 h-48 md:w-64 md:h-64">
