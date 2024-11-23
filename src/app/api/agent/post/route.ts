@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     // Get call_id from request body
     const { call_id } = await req.json();
+    console.log('Received call_id:', call_id);
     
     if (!call_id) {
       return NextResponse.json(
@@ -30,7 +31,10 @@ export async function POST(req: NextRequest) {
       fetch: fetch
     });
 
+    console.log('Fetching call data for call_id:', call_id);
     const callResponse = await client.call.retrieve(call_id);
+    console.log('Retrieved call data, transcript length:', callResponse.transcript?.length || 0);
+
     const transcript = callResponse.transcript;
 
     if (!transcript) {
@@ -40,10 +44,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate title and content using Anthropic
+    console.log('Generating title and content with Anthropic');
     const { title, content } = await getPostTitleAndContent(transcript, "");
+    console.log('Generated title:', title);
 
-    // Store in Supabase
+    console.log('Storing content in Supabase');
     const { data, error } = await supabase
       .from('content_items')
       .insert({
@@ -55,7 +60,12 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+
+    console.log('Successfully stored content with ID:', data.id);
 
     return NextResponse.json({ 
       success: true,
@@ -67,7 +77,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error processing request:', error);
     return NextResponse.json(
       { error: 'Error processing call data' },
       { status: 500 }
