@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
             {
                 source: '/',
                 destination: '/home',
-                permanent: false, // Use `true` for 308 permanent redirect
+                permanent: true, // Use `true` for 308 permanent redirect
             },
         ];
     },
