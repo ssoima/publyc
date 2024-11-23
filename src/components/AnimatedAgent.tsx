@@ -13,6 +13,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
   const [rotation, setRotation] = useState(0);
   const [devices, setDevices] = useState<{ audio: MediaDeviceInfo[] }>({ audio: [] });
   const [token, setToken] = useState('');
+  const [callId, setCallId] = useState<string>('');
 
   // Get available audio devices
   useEffect(() => {
@@ -44,8 +45,11 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
           },
         });
         const data = await response.json();
-        console.log('token', data.accessToken)
+        console.log('token', data.accessToken);
         setToken(data.accessToken);
+        if (data.callId) {
+          setCallId(data.callId);
+        }
       } catch (error) {
         console.error("Failed to fetch token:", error);
       }
@@ -123,6 +127,20 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
       console.log('📞 isSpeaking deactivated, stopping call...');
       retellClientRef.current.stopCall();
       retellClientRef.current = null;
+      if (callId) {
+        fetch('/api/agent/post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ call_id: callId }),
+        })
+        .then(response => response.json())
+        .then(data => console.log('Call data processed:', data))
+        .catch(error => console.error('Error processing call:', error));
+      }
+      // TODO: Clear redirect to post page
+      setCallId('');
     }
 
     return () => {
@@ -133,7 +151,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
         retellClientRef.current = null;
       }
     };
-  }, [token, devices.audio, isSpeaking]);
+  }, [token, devices.audio, isSpeaking, callId]);
 
   return (
     <div className="relative w-48 h-48 md:w-64 md:h-64">
