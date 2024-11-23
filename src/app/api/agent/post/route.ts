@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Retell from 'retell-sdk';
-import { getTitleOfPost, getMainContentOfPost } from '@/lib/anthropic';
+import { getPostTitleAndContent } from '@/lib/anthropic';
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -41,15 +41,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate title and content using Anthropic
-    const title = await getTitleOfPost(transcript);
-    const details = await getMainContentOfPost(transcript);
+    const { title, content } = await getPostTitleAndContent(transcript, "");
 
     // Store in Supabase
     const { data, error } = await supabase
       .from('content_items')
       .insert({
         title,
-        details,
+        details: content,
         content_type: 'post',
         status: 'draft'
       })
