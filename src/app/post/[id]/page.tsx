@@ -1,8 +1,13 @@
 import { posts } from "@/data/posts";
 import { notFound } from "next/navigation";
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-  const post = posts.find(p => p.id === params.id);
+export default async function PostPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const resolvedParams = await params;
+  const post = posts.find(p => p.id === resolvedParams.id);
 
   if (!post) {
     notFound();
