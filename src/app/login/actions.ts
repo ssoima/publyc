@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
+import {headers} from "next/headers";
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -45,16 +46,24 @@ export async function signup(formData: FormData) {
     redirect('/')
 }
 
-export async function signInWithLinkedIn() {
-    console.log("in signInWithLinkedIn:")
 
+export async function signInWithLinkedIn() {
     const supabase = await createClient()
+    const origin = (await headers()).get('origin')
+    console.log(origin)
+
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
+        options: {
+            redirectTo: `${origin}/auth/callback`,
+        },
     })
-    console.log("data returned on signInWithLinkedIn:",data)
+    if (error) {
+        console.error('Error during LinkedIn login:', error)
+    } else if (data?.url) {
+        redirect(data.url)
+    }
 }
-
 async function signOut() {
     const supabase = await createClient()
 
