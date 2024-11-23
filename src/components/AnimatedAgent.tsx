@@ -3,17 +3,21 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { RetellWebClient } from "retell-client-js-sdk";
+import { useRouter } from 'next/navigation'
+import { Loader2 } from "lucide-react"
 
 interface AnimatedAgentProps {
   isSpeaking: boolean
 }
 
 export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
+  const router = useRouter();
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const [rotation, setRotation] = useState(0);
   const [devices, setDevices] = useState<{ audio: MediaDeviceInfo[] }>({ audio: [] });
   const [token, setToken] = useState('');
   const [callId, setCallId] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Get available audio devices
   useEffect(() => {
@@ -127,7 +131,9 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
       console.log('📞 isSpeaking deactivated, stopping call...');
       retellClientRef.current.stopCall();
       retellClientRef.current = null;
+      
       if (callId) {
+        setIsProcessing(true);
         fetch('/api/agent/post', {
           method: 'POST',
           headers: {
@@ -136,11 +142,18 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
           body: JSON.stringify({ call_id: callId }),
         })
         .then(response => response.json())
-        .then(data => console.log('Call data processed:', data))
-        .catch(error => console.error('Error processing call:', error));
+        .then(data => {
+          console.log('Call data processed:', data);
+          if (data.success && data.data.id) {
+            router.push(`/post/${data.data.id}`);
+          }
+        })
+        .catch(error => console.error('Error processing call:', error))
+        .finally(() => {
+          setIsProcessing(false);
+          setCallId('');
+        });
       }
-      // TODO: Clear redirect to post page
-      setCallId('');
     }
 
     return () => {
@@ -151,10 +164,15 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
         retellClientRef.current = null;
       }
     };
-  }, [token, devices.audio, isSpeaking, callId]);
+  }, [token, devices.audio, isSpeaking, callId, router]);
 
   return (
     <div className="relative w-48 h-48 md:w-64 md:h-64">
+      {isProcessing && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+      )}
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-[#2D12E9] to-[#000000] rounded-full"
         animate={{

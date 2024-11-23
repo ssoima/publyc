@@ -245,9 +245,18 @@ export default function PostPage() {
           )}
         </div>
 
-        <div className="prose dark:prose-invert max-w-none">
-          <p className="text-xl leading-relaxed">{currentPost?.details || ''}</p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl font-bold">Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div 
+              className="h-[200px] p-4 rounded-md border bg-white overflow-y-auto"
+            >
+              {currentPost?.details || ''}
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="border-2 border-dashed">
           <CardHeader>
@@ -296,9 +305,9 @@ export default function PostPage() {
                   <div className="relative">
                     <Textarea
                       ref={textareaRef}
-                      value={currentPost?.x_description || ''} // Fallback to empty string
+                      value={currentPost?.x_description || ''}
                       onChange={handleXDescriptionChange}
-                      className="min-h-[100px] relative z-10 bg-white"
+                      className="min-h-[200px] max-h-[200px] overflow-y-auto relative z-10 bg-white"
                       onSelect={handleTextSelection}
                     />
                     {selectedText && selectionStart !== null && selectionEnd !== null && (
@@ -356,9 +365,9 @@ export default function PostPage() {
                 </div>
               ) : (
                 <div 
-                  className="min-h-[100px] p-4 rounded-md border bg-white"
+                  className="h-[200px] p-4 rounded-md border bg-white overflow-y-auto"
                   dangerouslySetInnerHTML={{ 
-                    __html: currentPost?.x_description || '' // Fallback to empty string
+                    __html: currentPost?.x_description || ''
                   }}
                 />
               )}
@@ -391,9 +400,9 @@ export default function PostPage() {
                   <div className="relative">
                     <Textarea
                       ref={textareaRef}
-                      value={currentPost?.linkedin_description || ''} // Fallback to empty string
+                      value={currentPost?.linkedin_description || ''}
                       onChange={handleLinkedInDescriptionChange}
-                      className="min-h-[100px] relative z-10 bg-transparent"
+                      className="min-h-[200px] max-h-[200px] overflow-y-auto relative z-10 bg-transparent"
                       onSelect={handleTextSelection}
                     />
                     {selectedText && selectionStart !== null && selectionEnd !== null && (
@@ -449,9 +458,9 @@ export default function PostPage() {
                 </div>
               ) : (
                 <div 
-                  className="min-h-[100px] p-4 rounded-md border bg-white"
+                  className="h-[200px] p-4 rounded-md border bg-white overflow-y-auto"
                   dangerouslySetInnerHTML={{ 
-                    __html: currentPost?.linkedin_description || '' // Fallback to empty string
+                    __html: currentPost?.linkedin_description || ''
                   }}
                 />
               )}
