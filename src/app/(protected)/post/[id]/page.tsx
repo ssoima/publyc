@@ -1,14 +1,14 @@
 'use client'
-
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Menu, PenSquare, RotateCcw, Share2, ImagePlus, X } from 'lucide-react'
-import { notFound } from "next/navigation"
+import { notFound, useParams } from "next/navigation"
 import Image from "next/image"
 import { SharePopup } from "@/components/share-popup"
 import { posts } from "@/data/posts"
+
 
 const textareaStyles = {
   backgroundColor: 'white',
@@ -22,11 +22,8 @@ const textareaStyles = {
   }
 }
 
-export default function PostPage({ 
-  params 
-}: { 
-  params?: { id?: string }
-}) {
+export default function PostPage() {
+  const params = useParams()
   const [editMode, setEditMode] = useState<'x' | 'linkedin' | null>(null)
   const [regeneratePrompt, setRegeneratePrompt] = useState("")
   const [currentPost, setCurrentPost] = useState(posts[0])
@@ -40,15 +37,13 @@ export default function PostPage({
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
 
   useEffect(() => {
-    if (params?.id) {
-      const foundPost = posts.find(p => p.id === params.id)
-      if (foundPost) {
-        setCurrentPost(foundPost)
-      } else {
-        notFound()
-      }
+    const foundPost = posts.find(p => p.id === params.id)
+    if (foundPost) {
+      setCurrentPost(foundPost)
+    } else {
+      notFound()
     }
-  }, [params?.id])
+  }, [params.id])
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -122,6 +117,14 @@ export default function PostPage({
   const handlePublish = () => {
     console.log(`Publishing post to ${activeNetwork}`)
     setIsSharePopupOpen(false)
+  }
+
+  const handleXDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCurrentPost({ ...currentPost, x_description: e.target.value })
+  }
+
+  const handleLinkedInDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCurrentPost({ ...currentPost, linkedin_description: e.target.value })
   }
 
   if (!currentPost) {
@@ -237,10 +240,11 @@ export default function PostPage({
                     <Textarea
                       ref={textareaRef}
                       value={currentPost.x_description}
+                      onChange={handleXDescriptionChange}
                       className="min-h-[100px] relative z-10 bg-white"
                       onSelect={handleTextSelection}
                     />
-                    {selectedText && (
+                    {selectedText && selectionStart !== null && selectionEnd !== null && (
                       <div 
                         className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none"
                       >
@@ -326,18 +330,19 @@ export default function PostPage({
                     <Textarea
                       ref={textareaRef}
                       value={currentPost.linkedin_description}
+                      onChange={handleLinkedInDescriptionChange}
                       className="min-h-[100px] relative z-10 bg-transparent"
                       onSelect={handleTextSelection}
                     />
-                    {selectedText && (
+                    {selectedText && selectionStart !== null && selectionEnd !== null && (
                       <div 
                         className="absolute inset-0 pointer-events-none"
                         style={{
                           background: `linear-gradient(90deg, 
                             transparent 0%,
-                            #dbeafe ${(selectionStart / textareaRef.current?.value.length || 1) * 100}%, 
-                            #dbeafe ${(selectionEnd / textareaRef.current?.value.length || 1) * 100}%,
-                            transparent ${(selectionEnd / textareaRef.current?.value.length || 1) * 100}%
+                            #dbeafe ${(selectionStart / (textareaRef.current?.value.length || 1)) * 100}%, 
+                            #dbeafe ${(selectionEnd / (textareaRef.current?.value.length || 1)) * 100}%,
+                            transparent ${(selectionEnd / (textareaRef.current?.value.length || 1)) * 100}%
                           )`
                         }}
                       />
