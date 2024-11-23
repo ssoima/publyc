@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -22,11 +21,11 @@ const textareaStyles = {
   }
 }
 
-export default function PostPage({ 
-  params 
-}: { 
-  params?: { id?: string }
-}) {
+interface PageParams {
+  params: { id: string };
+}
+
+export default function PostPage({ params }: PageParams) {
   const [editMode, setEditMode] = useState<'x' | 'linkedin' | null>(null)
   const [regeneratePrompt, setRegeneratePrompt] = useState("")
   const [currentPost, setCurrentPost] = useState(posts[0])
@@ -40,15 +39,13 @@ export default function PostPage({
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!params?.id) return;
-    
     const foundPost = posts.find(p => p.id === params.id)
     if (foundPost) {
       setCurrentPost(foundPost)
     } else {
       notFound()
     }
-  }, [params?.id])
+  }, [params.id])
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]

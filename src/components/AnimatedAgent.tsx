@@ -6,7 +6,6 @@ import { RetellWebClient } from "retell-client-js-sdk";
 
 interface AnimatedAgentProps {
   isSpeaking: boolean
-  token: string
 }
 
 export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
