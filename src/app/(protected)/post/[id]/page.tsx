@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Menu, PenSquare, RotateCcw, Share2, ImagePlus, X } from 'lucide-react'
-import { notFound } from "next/navigation"
+import { notFound, useParams } from "next/navigation"
 import Image from "next/image"
 import { SharePopup } from "@/components/share-popup"
 import { posts } from "@/data/posts"
+
 
 const textareaStyles = {
   backgroundColor: 'white',
@@ -21,11 +22,8 @@ const textareaStyles = {
   }
 }
 
-interface PageParams {
-  params: { id: string };
-}
-
-export default function PostPage({ params }: PageParams) {
+export default function PostPage() {
+  const params = useParams()
   const [editMode, setEditMode] = useState<'x' | 'linkedin' | null>(null)
   const [regeneratePrompt, setRegeneratePrompt] = useState("")
   const [currentPost, setCurrentPost] = useState(posts[0])
