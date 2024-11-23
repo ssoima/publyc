@@ -44,3 +44,19 @@ export async function signup(formData: FormData) {
     revalidatePath('/', 'layout')
     redirect('/')
 }
+
+export async function signInWithLinkedIn() {
+    console.log("in signInWithLinkedIn:")
+
+    const supabase = await createClient()
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+    })
+    console.log("data returned on signInWithLinkedIn:",data)
+}
+
+async function signOut() {
+    const supabase = await createClient()
+
+    const { error } = await supabase.auth.signOut()
+}

@@ -1,13 +1,40 @@
-// import necessary components and functions
+// Import necessary modules and components
 import { login, signup } from './actions'
-import { signIn } from 'next-auth/react' // For LinkedIn social login
+import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
+
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Divider } from '@/components/ui/divider' // Assuming you have a Divider component
-import { LinkedInIcon } from '@/components/icons/linkedin' // Custom LinkedIn icon component
+import { Separator } from '@/components/ui/separator'
+import { Linkedin } from 'lucide-react'
+import {createClient} from "@/utils/supabase/server"; // For LinkedIn icon
 
 export default function LoginPage() {
+    const signInWithLinkedIn = async () => {
+        'use server'
+
+        // 1. Create a Supabase client
+        const supabase = await createClient()
+        const origin = (await headers()).get('origin')
+        console.log(origin)
+        // 2. Sign in with LinkedIn
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'linkedin_oidc',
+            options: {
+                redirectTo: `${origin}/post/1`,//`${origin}/auth/callback`,
+            },
+        })
+
+        if (error) {
+            console.error('Error during LinkedIn login:', error)
+        } else {
+            // 3. Redirect to the authentication URL
+            console.log("this is the data url: ", data.url)
+            redirect(data.url)
+        }
+    }
+
     return (
         <div className="container mx-auto flex flex-col items-center justify-center min-h-screen">
             <div className="w-full max-w-md p-8 space-y-6">
@@ -29,16 +56,20 @@ export default function LoginPage() {
                     </Button>
                 </form>
 
-                <Divider text="Or continue with" />
+                {/* Custom Separator with Text */}
+                <div className="flex items-center my-4">
+                    <Separator className="flex-1" />
+                    <span className="px-4 text-sm text-muted-foreground">Or continue with</span>
+                    <Separator className="flex-1" />
+                </div>
 
-                <Button
-                    variant="outline"
-                    className="w-full flex items-center justify-center"
-                    onClick={() => signIn('linkedin')}
-                >
-                    <LinkedInIcon className="mr-2 h-5 w-5" />
-                    Continue with LinkedIn
-                </Button>
+                {/* LinkedIn Login Button */}
+                <form action={signInWithLinkedIn} method="post" className="w-full">
+                    <Button type="submit" variant="outline" className="w-full flex items-center justify-center">
+                        <Linkedin className="mr-2 h-5 w-5" />
+                        Continue with LinkedIn
+                    </Button>
+                </form>
             </div>
         </div>
     )
