@@ -10,7 +10,7 @@ export default function LoginPage() {
                 <h1 className="text-center text-3xl font-bold">Sign in to your account</h1>
 
                 {/* LinkedIn Login Button */}
-                <form action={signInWithLinkedIn} method="post" className="w-full">
+                <form action={signInWithLinkedIn} method="POST" className="w-full">
                     <Button type="submit" variant="outline" className="w-full flex items-center justify-center">
                         <Linkedin className="mr-2 h-5 w-5" />
                         Continue with LinkedIn
