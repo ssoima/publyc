@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
         };
         return config;
     },
+    async redirects() {
+        return [
+            {
+                source: '/',
+                destination: '/home',
+                permanent: false, // Use `true` for 308 permanent redirect
+            },
+        ];
+    },
 };
 
 export default nextConfig;
