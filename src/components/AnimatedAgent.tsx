@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { RetellWebClient } from "retell-client-js-sdk";
 import { useRouter } from 'next/navigation'
 import { Loader2 } from "lucide-react"
+import { useAgent } from '@/contexts/AgentContext'
 
 interface AnimatedAgentProps {
   isSpeaking: boolean
@@ -12,6 +13,7 @@ interface AnimatedAgentProps {
 
 export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
   const router = useRouter();
+  const { agentId } = useAgent();
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const [rotation, setRotation] = useState(0);
   const [devices, setDevices] = useState<{ audio: MediaDeviceInfo[] }>({ audio: [] });
@@ -63,6 +65,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ agent_id: agentId }),
           credentials: 'include', // Add this to ensure cookies are sent
         });
         
@@ -89,7 +92,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
     if (isSpeaking) {
       fetchToken();
     }
-  }, [isSpeaking]);
+  }, [isSpeaking, agentId]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

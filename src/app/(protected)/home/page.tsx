@@ -3,14 +3,41 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { mockArticles } from "@/data/mockArticles";
 import { AnimatedAgent } from "@/components/AnimatedAgent";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAgent } from "@/contexts/AgentContext";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Home() {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const { agentId, setAgentId } = useAgent();
+
+  useEffect(() => {
+    const fetchAgentId = async () => {
+      if (!agentId) {
+        const supabase = createClient();
+        
+        // Get the current user's agent
+        const { data, error } = await supabase
+          .from('user_agent')
+          .select('agent_id')
+          .single();
+
+        if (error) {
+          console.error('Error fetching agent:', error);
+          return;
+        }
+
+        if (data?.agent_id) {
+          setAgentId(data.agent_id);
+        }
+      }
+    };
+
+    fetchAgentId();
+  }, [agentId, setAgentId]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-[#FFFBF0]">
-      
       {/* Content */}
       <div className="relative h-screen flex flex-col items-center justify-between p-8 pb-20">
         {/* Top section with animated agent */}
