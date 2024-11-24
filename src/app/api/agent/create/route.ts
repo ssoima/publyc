@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { createAgent } from '@/services/agent'
 
 export async function POST(request: Request) {
     const supabase = await createClient()
     
-    // Get the authenticated user from the session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
@@ -15,19 +15,15 @@ export async function POST(request: Request) {
     }
 
     try {
-        // Get request body
         const body = await request.json()
-        
-        // TODO: Create Retell agent
-        // const agent = await retell.createAgent({
-        //     name: body.name,
-        //     voice: body.voice,
-        //     // other parameters...
-        // })
+        const result = await createAgent({
+            name: body.name,
+            voice: body.voice
+        })
         
         return NextResponse.json({ 
             message: 'Agent created successfully',
-            agent_id: 'MOCK_AGENT_ID'
+            agent_id: result.agent_id
         })
 
     } catch (error) {
