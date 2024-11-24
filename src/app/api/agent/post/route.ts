@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Retell from 'retell-sdk';
 import { getPostTitleAndContent } from '@/lib/anthropic';
-import { supabase } from '@/lib/supabase';
+import {createClient} from "@/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient()
   const apiKey = process.env.RETELL_API_KEY;
   
   if (!apiKey) {
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     console.log('Fetching call data for call_id:', call_id);
     const callResponse = await client.call.retrieve(call_id);
-    console.log('Retrieved call data,')
+    console.log('Retrieved call data:', callResponse.transcript);
     console.log('Retrieved call data, transcript length:', callResponse.transcript?.length || 0);
 
     const transcript = callResponse.transcript;

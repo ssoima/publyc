@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import type { TablesUpdate } from '@/lib/database.types';
+import {createClient} from "@/utils/supabase/server";
 
 export async function PUT(request: Request) {
+  const supabase = await createClient()
+
   try {
     const { id, ...updateData } = await request.json() as TablesUpdate<'content_items'> & { id: string };
     
