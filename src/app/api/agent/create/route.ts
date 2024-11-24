@@ -24,19 +24,7 @@ export async function POST(request: Request) {
         //     voice: body.voice,
         //     // other parameters...
         // })
-
-        // Update user with new agent_id
-        const { error: updateError } = await supabase
-            .from('users')
-            .update({ 
-                agent_id: 'MOCK_AGENT_ID' // This would be agent.id from Retell
-            })
-            .eq('id', user.id)
-
-        if (updateError) {
-            throw updateError
-        }
-
+        
         return NextResponse.json({ 
             message: 'Agent created successfully',
             agent_id: 'MOCK_AGENT_ID'

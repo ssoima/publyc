@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 // The client you created from the Server-Side Auth instructions
 import { createClient } from '@/utils/supabase/server'
-import { handleUserCreation } from '@/utils/supabase/user-management'
+import { handleUserAgentConnection } from '@/utils/supabase/user-management'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
             
             if (user) {
                 try {
-                    await handleUserCreation(supabase, user)
+                    await handleUserAgentConnection(supabase, user.id)
                 } catch (error) {
                     console.error('Error in user creation:', error)
                     // You might want to handle this error differently

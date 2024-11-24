@@ -1,10 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/lib/database.types'
+import { AgentContext } from '@/contexts/AgentContext'
 
 export async function handleUserAgentConnection(
   supabase: SupabaseClient<Database>,
   userId: string,
-  agentId: string
+  setAgentId?: (id: string | null) => void
 ) {
     console.log("checking if user_agent exists")
 
@@ -13,44 +14,64 @@ export async function handleUserAgentConnection(
         .from('user_agent')
         .select('*')
         .eq('user_id', userId)
-        .eq('agent_id', agentId)
         .single()
 
-    if (!existingConnection && !fetchError) {
-        // Create new agent via API
-        const response = await fetch('/api/agent/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            name: 'New Agent', // You might want to pass this as a parameter
-            voice: 'default'   // You might want to pass this as a parameter
-        })
-        })
+    console.log("existingConnection", existingConnection)
 
-        if (!response.ok) {
-        throw new Error('Failed to create agent')
-        }
+    if (fetchError) {
+        console.error('Error fetching user_agent:', fetchError)
+    }
 
-        const { agent_id } = await response.json()
+    if (!existingConnection) {
+        console.log("no existing connection, creating new agent")
+        try {
+            // Create new agent via API
+            const response = await fetch('/api/agent/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: 'New Agent',
+                    voice: 'default'
+                })
+            })
 
-        // Create connection with new agent_id
-        const { error: insertError } = await supabase
-        .from('user_agent')
-        .insert([
-            {
-            user_id: userId,
-            agent_id: agent_id // Use the newly created agent_id
+            if (!response.ok) {
+                throw new Error('Failed to create agent')
             }
-        ])
-        
-        if (insertError) {
-        console.error('Error creating user-agent connection:', insertError)
-        throw insertError
-        }
 
-        return { user_id: userId, agent_id: agent_id }
+            const { agent_id } = await response.json()
+
+            // Update context if setAgentId is provided
+            if (setAgentId) {
+                setAgentId(agent_id)
+            }
+
+            // Create connection with new agent_id
+            const { error: insertError } = await supabase
+                .from('user_agent')
+                .insert([
+                    {
+                        user_id: userId,
+                        agent_id: agent_id
+                    }
+                ])
+            
+            if (insertError) {
+                throw insertError
+            }
+
+            return { user_id: userId, agent_id: agent_id }
+        } catch (error) {
+            console.error('Error in handleUserAgentConnection:', error)
+            throw error // Re-throw the error to be handled by the caller
+        }
+    }
+
+    // Update context with existing agent if setAgentId is provided
+    if (setAgentId && existingConnection) {
+        setAgentId(existingConnection.agent_id)
     }
 
     return existingConnection
