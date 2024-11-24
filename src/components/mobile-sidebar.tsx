@@ -20,7 +20,7 @@ export function MobileSidebar() {
       <SheetContent side="left" className="p-0 w-full">
         <div className="flex flex-col h-full">
           <div className="p-6 border-b">
-          <Link href="/" className="block" onClick={() => setIsOpen(false)}>
+          <Link href="/home" className="block" onClick={() => setIsOpen(false)}>
               <h2 className="text-2xl font-bold">publyc</h2>
             </Link>
           </div>
