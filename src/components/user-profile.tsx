@@ -21,7 +21,6 @@ export function UserProfile() {
   const handleSignOut = async () => {
     console.log("signing out")
     const supabase = createClient()
-    console.log(await supabase.auth.getUser())
     const { error } = await supabase.auth.signOut()
     if (error) {
       console.error('Error signing out:', error);

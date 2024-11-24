@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import type { TablesInsert } from '@/lib/database.types';
+import {createClient} from "@/utils/supabase/server";
 
 export async function POST(request: Request) {
+  const supabase = await createClient()
   try {
     const contentItem = await request.json() as TablesInsert<'content_items'>;
     
