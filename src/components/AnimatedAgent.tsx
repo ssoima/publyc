@@ -6,6 +6,7 @@ import { RetellWebClient } from "retell-client-js-sdk";
 import { useRouter } from 'next/navigation'
 import { Loader2 } from "lucide-react"
 import { useAgent } from '@/contexts/AgentContext'
+import AnimatedLogo from './AnimatedLogo'
 
 interface AnimatedAgentProps {
   isSpeaking: boolean
@@ -226,49 +227,16 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
         retellClientRef.current = null;
       }
     };
-  }, [token, devices.audio, isSpeaking, callId, router]);
+  }, [token]);//[token, devices.audio, isSpeaking, callId, router]);
 
   return (
-    <div className="relative w-48 h-48 md:w-64 md:h-64">
+    <div className="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
       {isProcessing && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full z-10">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
         </div>
       )}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-[#2D12E9] to-[#000000] rounded-full"
-        animate={{
-          scale: isSpeaking ? [1, 1.2, 1] : 1,
-        }}
-        transition={{
-          duration: 1,
-          repeat: isSpeaking ? Infinity : 0,
-          repeatType: "reverse",
-        }}
-      />
-      <motion.div
-        className="absolute inset-2 bg-white dark:bg-black rounded-full flex items-center justify-center"
-        animate={{
-          rotate: isSpeaking ? 360 : 0
-        }}
-        transition={{
-          duration: 2,
-          repeat: isSpeaking ? Infinity : 0,
-          ease: "linear"
-        }}
-      >
-        <motion.div
-          className="w-16 h-16 md:w-24 md:h-24 border-4 border-[#2D12E9] rounded-full"
-          animate={{
-            scale: isSpeaking ? [1, 1.3, 1] : 1,
-          }}
-          transition={{
-            duration: 0.5,
-            repeat: isSpeaking ? Infinity : 0,
-            repeatType: "reverse",
-          }}
-        />
-      </motion.div>
+      <AnimatedLogo isSpeaking={isSpeaking} />
     </div>
   )
 }
