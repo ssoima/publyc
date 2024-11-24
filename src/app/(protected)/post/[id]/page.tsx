@@ -8,6 +8,8 @@ import { notFound, useParams } from "next/navigation"
 import Image from "next/image"
 import { SharePopup } from "@/components/share-popup"
 import type { Tables } from "@/lib/database.types"
+import {supabase} from "@/lib/supabase";
+import {createClient} from "@/utils/supabase/client";
 
 
 const textareaStyles = {
@@ -38,6 +40,11 @@ export default function PostPage() {
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
 
   useEffect(() => {
+    const func = async () => {
+    const supabase = createClient()
+      console.log(await supabase.auth.getUser())
+    }
+    func()
     const fetchPost = async () => {
       try {
         const response = await fetch(`/api/db/read?id=${params.id}`)
