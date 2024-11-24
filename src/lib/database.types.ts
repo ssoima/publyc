@@ -93,6 +93,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_agent: {
+        Row: {
+          agent_id: string
+          created_at: string | null
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string | null
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           agent_id: string | null
