@@ -18,8 +18,11 @@ export async function POST(req: NextRequest) {
       fetch: fetch
     });
 
+    const body = await req.json().catch(() => ({}));
+    const agentId = body.agent_id || 'agent_44d9118a49a822e22bfc1c2023';
+
     const webCallResponse = await client.call.createWebCall({ 
-      agent_id: 'agent_44d9118a49a822e22bfc1c2023' 
+      agent_id: agentId 
     });
 
     return NextResponse.json({ 
