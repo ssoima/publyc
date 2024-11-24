@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
 
     console.log('Fetching call data for call_id:', call_id);
     const callResponse = await client.call.retrieve(call_id);
+    console.log('Retrieved call data,')
     console.log('Retrieved call data, transcript length:', callResponse.transcript?.length || 0);
 
     const transcript = callResponse.transcript;
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     if (!transcript) {
       return NextResponse.json(
         { error: 'No call data found' },
-        { status: 404 }
+        { status: 500 }
       );
     }
 
