@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { generateEmbedding } from '@/lib/embeddings';
-import { supabase } from '@/lib/supabase';
+import {createClient} from "@/utils/supabase/server";
 
 export async function POST(request: Request) {
+  const supabase = await createClient()
+
   try {
     const { title, content, category } = await request.json();
     

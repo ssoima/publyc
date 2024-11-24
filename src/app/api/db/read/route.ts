@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import {createClient} from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
+  const supabase = await createClient()
   try {
     // Get query parameters from URL
     const { searchParams } = new URL(request.url);

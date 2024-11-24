@@ -3,12 +3,6 @@ import { authMiddleware } from './middleware/authMiddleware'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-    // For API routes that need authentication
-    if (request.nextUrl.pathname.startsWith('/api/agent/')) {
-        return authMiddleware(request)
-    }
-
-    // For regular pages
     return await updateSession(request)
 }
 

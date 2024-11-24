@@ -68,22 +68,10 @@ export async function getPostTitleAndContent(thoughts: string, memory: string): 
         apiKey: process.env["ANTHROPIC_API_KEY"]
     });
 
-    const prompt = `
+    const systemPrompt = `
 You are a writer tasked with brainstorming and crafting a blog post based on provided thoughts and memory. Your goal is to generate both a title and the main content of the post, returning them as JSON. Use the thoughts as the main idea and incorporate the memory as additional context to enrich the content.
 
 First, you will be given the thoughts and memory. Then, you will craft a title and write the main content following specific guidelines.
-
-Here are the thoughts and memory:
-
-<thoughts>
-${thoughts}
-</thoughts>
-
-<memory>
-${memory}
-</memory>
-
-Now, follow these instructions to complete the task:
 
 1. Crafting the Title:
 Create a succinct, engaging, and short title for the post. Keep these tips in mind:
@@ -97,36 +85,56 @@ Example titles:
 - "The Future of AI in Content Creation"
 
 2. Writing the Main Content:
-Using the same thoughts and memory, write a single string for the main content that includes:
+Using the same thoughts and some memory, extract the key points to shape the thoughts. Follow these guidelines:
 - Introduction: Hook the reader with an intriguing opening.
 - Key Arguments or Ideas: Present the main points or arguments concisely and engagingly.
 - Supporting Details: Incorporate the memory to provide examples, anecdotes, or context that enrich the main points.
 - Takeaway or Call to Action: End with a conclusion that encourages further thought or engagement.
 - If the conversation is short, just take all the ideas from the conversation.
 
-The content should be engaging, clear, and concise, suitable for a blog post or LinkedIn article.
+The content should be engaging, clear, and concise, suitable for a blog post or LinkedIn article.`;
 
-3. Output Format:
-Format your response as a JSON object with two keys: "title" and "content". The "title" value should be your generated title, and the "content" value should be your generated main content as a single string.
-
-Please provide your output in the following format:
-<output>
-{
-  "title": "Your Generated Title Here",
-  "content": "Your generated main content as a single string here."
-}
-</output>
-
-Now, based on the provided thoughts and memory, generate the title and main content for the blog post, and return them in the specified JSON format.`;
+    const prompt = `Here are the thoughts and memory:
+        <thoughts>
+        ${thoughts}
+        </thoughts>
+        
+        <memory>
+        ${memory}
+        </memory>
+        
+        Based on the provided thoughts and memory, generate the title and main content for creating a draft`;
 
     try {
         const msg= await anthropic.messages.create({
             model: "claude-3-5-sonnet-20241022",
+            system: systemPrompt,
+            tools: [
+                {
+                    "name": "create_draft",
+                    "description": "Creates a draft for a writing a blog, linkedin or twitter post from the provided title and content.",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "type": "string",
+                                "description": "Generated title for the thoughts and memory provided."
+                            },
+                            "content": {
+                                "type": "string",
+                                "description": "The main content of the thoughts augmented with information from the provided memory."
+                            }
+                        },
+                        "required": ["title", "content"]
+                    }
+                }
+            ],
+            tool_choice: {"type": "tool", "name": "create_draft"},
             max_tokens: 1024,
             temperature: 0.5,
             messages: [{ role: "user", content: prompt }],
         });
-        return JSON.parse((msg.content[0] as any).text);
+        return (msg.content[0] as any).input;
     } catch (error) {
         console.error("Error generating post title and content:", error);
         throw error;
