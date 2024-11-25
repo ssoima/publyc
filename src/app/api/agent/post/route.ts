@@ -4,6 +4,8 @@ import { getPostTitleAndContent } from '@/lib/anthropic';
 import {createClient} from "@/utils/supabase/server";
 import { match_entries } from '@/lib/memory';
 
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const apiKey = process.env.RETELL_API_KEY;
