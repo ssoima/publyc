@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       .join('\n');
     
     console.log('Generating title and content with Anthropic');
-    const { title, content } = await getPostTitleAndContent(transcript, memoriesContext);
+    const { title, content, linkedin, twitter } = await getPostTitleAndContent(transcript, memoriesContext);
     console.log('Generated title:', title);
 
     console.log('Storing content in Supabase');
@@ -66,7 +66,9 @@ export async function POST(req: NextRequest) {
         title,
         details: content,
         content_type: 'post',
-        status: 'draft'
+        status: 'draft',
+        linkedin_description: linkedin || null,
+        x_description: twitter || null
       })
       .select()
       .single();

@@ -161,6 +161,50 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
       }
     };
 
+    const cleanupCall = async () => {
+      console.log('📞 isSpeaking deactivated, stopping call...');
+      if (retellClientRef.current) {
+        retellClientRef.current.stopCall();
+        retellClientRef.current = null;
+      }
+      
+      if (callId) {
+        setIsProcessing(true);
+        
+        try {
+          const response = await fetch('/api/agent/post', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ call_id: callId }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to process call');
+          }
+
+          const data = await response.json();
+          
+          try {
+            router.push(`/post/${data.data.id}`);
+          } catch (error) {
+            console.error('Error navigating:', error);
+            // Fallback navigation attempt
+            window.location.href = `/post/${data.data.id}`;
+          } finally {
+            setIsProcessing(false);
+            setCallId('');
+          }
+
+        } catch (error) {
+          console.error('Error sending post request:', error);
+          setIsProcessing(false);
+          setCallId('');
+        }
+      }
+    };
+
     if (isSpeaking && devices.audio.length > 0) {
       console.log('🎤 isSpeaking activated, initiating call...');
       setupRetellCall();
@@ -169,54 +213,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
         setRotation((prev) => (prev + 10) % 360);
       }, 100);
     } else if (!isSpeaking && retellClientRef.current) {
-      console.log('📞 isSpeaking deactivated, stopping call...');
-      retellClientRef.current.stopCall();
-      retellClientRef.current = null;
-      
-      if (callId) {
-        setIsProcessing(true);
-        
-        // Fire and forget the API call
-        try {
-          fetch('/api/agent/post', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ call_id: callId }),
-          });
-        } catch (error) {
-          console.error('Error sending post request:', error);
-
-        // Wait 3s and navigate
-        setTimeout(() => {
-          try {
-            router.push('/post/4b858f81-2ae0-4f58-9b13-f48c766c01bf');
-          } catch (error) {
-            console.error('Error navigating:', error);
-            // Fallback navigation attempt
-            window.location.href = '/post/4b858f81-2ae0-4f58-9b13-f48c766c01bf';
-          } finally {
-            setIsProcessing(false);
-            setCallId('');
-          }
-          }, 3000);
-        }
-        // Wait 3s and navigate
-        setTimeout(() => {
-            try {
-              router.push('/post/4b858f81-2ae0-4f58-9b13-f48c766c01bf');
-            } catch (error) {
-              console.error('Error navigating:', error);
-              // Fallback navigation attempt
-              window.location.href = '/post/4b858f81-2ae0-4f58-9b13-f48c766c01bf';
-            } finally {
-              setIsProcessing(false);
-              setCallId('');
-            }
-          }, 3000);
-
-      }
+      cleanupCall();
     }
 
     return () => {
