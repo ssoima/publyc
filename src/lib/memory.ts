@@ -18,9 +18,9 @@ export async function match_entries(
     const embedding = await generateEmbedding(query);
     
     const { data, error } = await supabase.rpc('match_entries', {
-      query_embedding: embedding.toString(), // Supabase expects a string
-      match_threshold: 0.7, // Adjust this threshold as needed
-      match_count: 5 // Adjust the number of matches as needed
+      query_embedding: `[${embedding.toString()}]`,
+      match_threshold: 0.7,
+      match_count: 5
     });
 
     if (error) {

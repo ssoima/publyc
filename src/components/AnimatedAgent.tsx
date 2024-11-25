@@ -227,7 +227,7 @@ export const AnimatedAgent: React.FC<AnimatedAgentProps> = ({ isSpeaking }) => {
         retellClientRef.current = null;
       }
     };
-  }, [token]);//[token, devices.audio, isSpeaking, callId, router]);
+  }, [token, devices.audio, isSpeaking, callId, router]);
 
   return (
     <div className="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
