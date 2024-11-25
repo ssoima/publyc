@@ -136,6 +136,7 @@ export default function PostPage() {
 
   const handlePublish = () => {
     console.log(`Publishing post to ${activeNetwork}`)
+    window.location.href = 'auth/linkedin';
     setIsSharePopupOpen(false)
   }
 

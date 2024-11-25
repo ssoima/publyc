@@ -14,13 +14,16 @@ import {createClient} from "@/utils/supabase/client";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {LogOut} from "lucide-react";
+import {useMemo} from "react";
 
 export function UserProfile() {
   const router = useRouter();
+  const supabase = useMemo(() => {
+    return createClient()
+  }, []);
 
   const handleSignOut = async () => {
     console.log("signing out")
-    const supabase = createClient()
     const { error } = await supabase.auth.signOut()
     if (error) {
       console.error('Error signing out:', error);
