@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Retell from 'retell-sdk';
 import { getPostTitleAndContent } from '@/lib/anthropic';
 import {createClient} from "@/utils/supabase/server";
+import { match_entries } from '@/lib/memory';
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -46,8 +47,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('Fetching relevant memories');
+    const relevantMemories = await match_entries(supabase, transcript);
+    const memoriesContext = relevantMemories
+      .map((memory: { title: string; content: string }) => 
+        `${memory.title}: ${memory.content}`
+      )
+      .join('\n');
+    
     console.log('Generating title and content with Anthropic');
-    const { title, content } = await getPostTitleAndContent(transcript, "");
+    const { title, content } = await getPostTitleAndContent(transcript, memoriesContext);
     console.log('Generated title:', title);
 
     console.log('Storing content in Supabase');
