@@ -98,16 +98,19 @@ export type Database = {
           agent_id: string
           created_at: string | null
           user_id: string
+          llm_id: string | null
         }
         Insert: {
           agent_id: string
           created_at?: string | null
           user_id: string
+          llm_id?: string | null
         }
         Update: {
           agent_id?: string
           created_at?: string | null
           user_id?: string
+          llm_id?: string | null
         }
         Relationships: []
       }

@@ -16,16 +16,19 @@ export default function Home() {
       if (!agentId) {
         const supabase = createClient();
         
-        // Get the current user's agent
+        // Get the current user's most recent agent
         const { data, error } = await supabase
           .from('user_agent')
           .select('agent_id')
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single();
 
         if (error) {
           console.error('Error fetching agent:', error);
           return;
         }
+        console.log('Agent data:', data);
 
         if (data?.agent_id) {
           setAgentId(data.agent_id);

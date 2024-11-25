@@ -18,7 +18,6 @@ export async function POST(request: Request) {
         const body = await request.json()
         const result = await createAgent({
             name: body.name,
-            voice: body.voice
         })
         
         return NextResponse.json({ 

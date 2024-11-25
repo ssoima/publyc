@@ -72,6 +72,19 @@ export default function SurveyPage() {
 
       if (error) throw error
 
+      // Update the LLM with the new persona information
+      const response = await fetch('/api/agent/update-persona', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update agent persona')
+      }
+
       router.push('/knowledgebase')
     } catch (error) {
       console.error('Error saving persona:', error)
