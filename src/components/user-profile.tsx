@@ -14,13 +14,24 @@ import {createClient} from "@/utils/supabase/client";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {LogOut} from "lucide-react";
-import {useMemo} from "react";
+import {useMemo, useState, useEffect} from "react";
 
 export function UserProfile() {
   const router = useRouter();
   const supabase = useMemo(() => {
     return createClient()
   }, []);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserData(user)
+      }
+    }
+    fetchUser()
+  }, [supabase.auth])
 
   const handleSignOut = async () => {
     console.log("signing out")
@@ -37,12 +48,17 @@ export function UserProfile() {
         <div className="flex flex-wrap items-center justify-between gap-y-2">
           <div className="flex items-center gap-x-4">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="/avatar-placeholder.jpg" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={userData?.user_metadata?.picture || "/avatar-placeholder.jpg"} />
+              <AvatarFallback>
+                {userData?.user_metadata?.name
+                  ?.split(' ')
+                  .map((n: string) => n[0])
+                  .join('') || 'U'}
+              </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-muted-foreground">john@example.com</p>
+              <p className="text-sm font-medium">{userData?.user_metadata?.name || 'User'}</p>
+              <p className="text-xs text-muted-foreground">{userData?.user_metadata?.email || 'No email'}</p>
             </div>
           </div>
 

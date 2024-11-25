@@ -2,13 +2,15 @@
 
 import { createClient } from "@/utils/supabase/client"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import * as React from "react"
 import { ArrowLeft } from "lucide-react"
 
 export default function SurveyPage() {
+  const supabase = createClient()
+  const [userData, setUserData] = useState<any>(null)
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -19,6 +21,16 @@ export default function SurveyPage() {
     style: '',
     goals: ''
   })
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserData(user)
+      }
+    }
+    fetchUser()
+  }, [supabase.auth])
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
@@ -107,17 +119,22 @@ export default function SurveyPage() {
         {/* Header */}
         <header className="flex items-center gap-4 border-b border-blue-500/30 pb-6">
           <div className="w-12 h-12">
-            {/* Replace with your SVG logo */}
-            <svg
-              viewBox="0 0 100 100"
-              className="w-full h-full text-white"
-              aria-hidden="true"
-            >
-              <circle cx="50" cy="50" r="40" fill="currentColor" />
-            </svg>
+            {userData?.user_metadata?.picture ? (
+              <img 
+                src={userData.user_metadata.picture} 
+                alt="Profile" 
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-lg">
+                  {userData?.user_metadata?.name?.[0] || '?'}
+                </span>
+              </div>
+            )}
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
-            your publyc persona
+            {userData?.user_metadata?.name} 
           </h1>
         </header>
 

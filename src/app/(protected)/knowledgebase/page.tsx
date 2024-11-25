@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { createClient } from "@/utils/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -18,10 +19,22 @@ interface KnowledgeEntry {
 }
 
 export default function KnowledgePage() {
+  const supabase = createClient()
+  const [userData, setUserData] = useState<any>(null)
   const [knowledgeEntries, setKnowledgeEntries] = useState<KnowledgeEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserData(user)
+      }
+    }
+    fetchUser()
+  }, [supabase.auth])
 
   // Fetch knowledge entries
   useEffect(() => {
@@ -80,15 +93,31 @@ export default function KnowledgePage() {
         <Card className="w-full max-w-3xl overflow-hidden">
           <div className="relative p-8 bg-gradient-to-br from-[#35f] to-black text-white">
             <div className="flex flex-col items-center text-center space-y-6">
-              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center text-2xl font-bold">
-                AJ
+              <div className="w-24 h-24">
+                {userData?.user_metadata?.picture ? (
+                  <img 
+                    src={userData.user_metadata.picture} 
+                    alt="Profile" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-white/10 rounded-full flex items-center justify-center text-2xl font-bold">
+                    <span className="text-white">
+                      {userData?.user_metadata?.full_name
+                        ?.split(' ')
+                        .map((n: string) => n[0])
+                        .join('')
+                        || 'U'}
+                    </span>
+                  </div>
+                )}
               </div>
               
               <div className="space-y-4">
-                <h1 className="text-3xl font-bold">Alex Johnson</h1>
-                <p className="text-lg text-blue-200">Tech-savvy millennial voice | AI Ethics Advocate</p>
+                <h1 className="text-3xl font-bold">{userData?.user_metadata?.name || 'User'}</h1>
+                <p className="text-lg text-blue-200">{userData?.user_metadata?.headline || 'Professional'}</p>
                 <p className="text-lg max-w-2xl mx-auto text-gray-200">
-                  Empowering the next generation of digital creators through innovative AI solutions while championing ethical technology practices and building meaningful communities.
+                  {userData?.user_metadata?.description || 'No description available'}
                 </p>
               </div>
               

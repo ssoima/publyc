@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { updateLLM } from '@/services/agent'
-import { NextResponse } from 'next/server'
+import { NextRequest,NextResponse } from 'next/server'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+    console.log("Updating agent persona")
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
@@ -39,13 +40,13 @@ export async function POST(request: Request) {
 
         // Get the existing LLM ID from the database
         const { data: agentData } = await supabase
-            .from('user_agents')
+            .from('user_agent')
             .select('llm_id')
             .eq('user_id', user.id)
             .single()
 
         if (!agentData?.llm_id) {
-            return NextResponse.json({ error: 'No LLM found for user' }, { status: 404 })
+            return NextResponse.json({ error: 'No LLM found for user' }, { status: 500 })
         }
 
         // Update the LLM with the new persona information
