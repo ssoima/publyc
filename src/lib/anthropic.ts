@@ -92,6 +92,14 @@ Using the same thoughts and some memory, extract the key points to shape the tho
 - Takeaway or Call to Action: End with a conclusion that encourages further thought or engagement.
 - If the conversation is short, just take all the ideas from the conversation.
 
+3. Write LinkedIn Post:
+- Write a LinkedIn post based on the title and content.
+- Depending on the context decide if a LinkedIn post is relevant. If it is, write a LinkedIn post based on the title and content.
+
+4. Write Twitter Post:
+- Write a Twitter post based on the title and content.
+- Depending on the context decide if a Twitter post is relevant. If it is, write a Twitter post based on the title and content.
+
 The content should be engaging, clear, and concise, suitable for a blog post or LinkedIn article.`;
 
     const prompt = `Here are the thoughts and memory:
@@ -123,6 +131,14 @@ The content should be engaging, clear, and concise, suitable for a blog post or 
                             "content": {
                                 "type": "string",
                                 "description": "The main content of the thoughts augmented with information from the provided memory."
+                            },
+                            "linkedin": {
+                                "type": "string",
+                                "description": "A Twitter post based on the title and content."
+                            },
+                            "twitter": {
+                                "type": "string",
+                                "description": "A Twitter post based on the title and content."
                             }
                         },
                         "required": ["title", "content"]
