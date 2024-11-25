@@ -1,11 +1,93 @@
 'use client'
 
+import { createClient } from "@/utils/supabase/client"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import * as React from "react"
 import { ArrowLeft } from "lucide-react"
 
 export default function SurveyPage() {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    introduction: '',
+    uniqueness: '',
+    audience: '',
+    value_proposition: '',
+    style: '',
+    goals: ''
+  })
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    const supabase = createClient()
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('Not authenticated')
+      }
+
+      // First check if a persona exists for this user
+      const { data: existingPersona } = await supabase
+        .from('personas')
+        .select()
+        .eq('user_id', user.id)
+        .single()
+
+      let error;
+      
+      if (!existingPersona) {
+        // Insert new persona
+        const { error: insertError } = await supabase
+          .from('personas')
+          .insert({
+            user_id: user.id,
+            introduction: formData.introduction,
+            uniqueness: formData.uniqueness,
+            audience: formData.audience,
+            value_proposition: formData.value_proposition,
+            style: formData.style,
+            goals: formData.goals
+          })
+        error = insertError
+      } else {
+        // Update existing persona
+        const { error: updateError } = await supabase
+          .from('personas')
+          .update({
+            introduction: formData.introduction,
+            uniqueness: formData.uniqueness,
+            audience: formData.audience,
+            value_proposition: formData.value_proposition,
+            style: formData.style,
+            goals: formData.goals
+          })
+          .eq('user_id', user.id)
+        error = updateError
+      }
+
+      if (error) throw error
+
+      router.push('/knowledgebase')
+    } catch (error) {
+      console.error('Error saving persona:', error)
+      // You might want to show an error message to the user here
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-black to-black">
       <div className="max-w-3xl mx-auto space-y-16">
@@ -44,6 +126,8 @@ I help people see the world differently. I'm a tech visionary and storyteller wh
 
 I'm not just a tech entrepreneur; I'm someone who stands at the crossroads of counterculture and technology. From calligraphy classes at Reed College to zen meditation in India, my journey has been about seeking perfection in simplicity and bringing that vision to life through technology.
 `}
+            value={formData.introduction}
+            onChange={(value) => handleInputChange('introduction', value)}
           />
 
           <SurveyQuestion
@@ -60,6 +144,8 @@ I want to be known as the person who makes technology human. My uniqueness comes
 - Ability to distill complex technologies into magical experiences
 - Creating reality distortion fields that push people beyond their perceived limits
                 `}
+            value={formData.uniqueness}
+            onChange={(value) => handleInputChange('uniqueness', value)}
           />
 
 
@@ -81,6 +167,8 @@ I serve the dreamers, the misfits, the rebels, the troublemakers - the ones who 
 - Business leaders looking to create category-defining products
 - Anyone who believes that the best way to predict the future is to invent it
 `}
+            value={formData.audience}
+            onChange={(value) => handleInputChange('audience', value)}
           />
 
         
@@ -107,6 +195,8 @@ For my audience, I translate this into:
 - Leadership principles for driving innovation
 - Stories that inspire people to pursue their crazy ideas
 `}
+            value={formData.value_proposition}
+            onChange={(value) => handleInputChange('value_proposition', value)}
           />
 
         <SurveyQuestion
@@ -150,6 +240,8 @@ Core Principles:
 
 Remember: The goal isn't to be likable - it's to be unforgettable. Every piece of content should feel like a keynote moment, even if it's just a LinkedIn post.
 `}
+            value={formData.style}
+            onChange={(value) => handleInputChange('style', value)}
           />
         </div>
 
@@ -188,13 +280,19 @@ One-Year Goals:
 
 Remember: I'm not here to win a popularity contest. I'm here to push the human race forward. If some people don't like my methods or message, that's fine. I'm looking for the ones who want to help change the world.
 `}
+            value={formData.goals}
+            onChange={(value) => handleInputChange('goals', value)}
           />
 
 
         {/* Submit Button */}
         <div className="pt-8">
-          <Button className="w-full #2D12E9 hover:bg-blue-900 text-white py-6 text-lg font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            Submit Your Responses
+          <Button 
+            className="w-full #2D12E9 hover:bg-blue-900 text-white py-6 text-lg font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Submit Your Responses'}
           </Button>
         </div>
 
@@ -216,12 +314,16 @@ function SurveyQuestion({
   number, 
   question, 
   context, 
-  placeholder 
+  placeholder,
+  value,
+  onChange
 }: { 
   number: number; 
   question: string; 
   context: string;
   placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -244,8 +346,12 @@ function SurveyQuestion({
         ref={textareaRef}
         className="w-full min-h-[120px] bg-black/50 border border-gray-700 rounded-md text-white focus:border-blue-500 focus:ring-blue-500 placeholder:text-gray-500 p-2 resize-none overflow-y-auto" 
         placeholder={placeholder}
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value)
+          adjustHeight()
+        }}
         rows={10}
-        onChange={adjustHeight}
       />
     </div>
   )
