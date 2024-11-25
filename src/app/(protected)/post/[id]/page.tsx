@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Menu, PenSquare, RotateCcw, Share2, ImagePlus, X } from 'lucide-react'
-import { notFound, useParams } from "next/navigation"
+import {notFound, useParams, useRouter} from "next/navigation"
 import Image from "next/image"
 import { SharePopup } from "@/components/share-popup"
 import type { Tables } from "@/lib/database.types"
@@ -24,6 +24,7 @@ const textareaStyles = {
 
 export default function PostPage() {
   const params = useParams()
+  const router = useRouter();
   const [editMode, setEditMode] = useState<'x' | 'linkedin' | null>(null)
   const [regeneratePrompt, setRegeneratePrompt] = useState("")
   const [currentPost, setCurrentPost] = useState<Tables<'content_items'> | null>(null)
@@ -136,6 +137,7 @@ export default function PostPage() {
 
   const handlePublish = () => {
     console.log(`Publishing post to ${activeNetwork}`)
+    router.push('/auth/linkedin');
     setIsSharePopupOpen(false)
   }
 

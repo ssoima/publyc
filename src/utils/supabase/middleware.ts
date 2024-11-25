@@ -34,6 +34,12 @@ export async function updateSession(request: NextRequest) {
     const {
         data: { user },
     } = await supabase.auth.getUser()
+    console.log('THIS IS THE User:\n-----------------------------------\n', user)
+    console.log('\n-----------------------------------\n')
+    console.log('THOSE ARE THE User identities:\n-----------------------------------\n', await supabase.auth.getUserIdentities())
+    console.log('\n-----------------------------------\n')
+    console.log('THis is the user session\n-----------------------------------\n', await supabase.auth.getSession())
+    console.log('\n-----------------------------------\n')
 
     if (
         !user &&
